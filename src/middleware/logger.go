@@ -1,9 +1,10 @@
 package middleware
 
 import (
-	"gin-framework/basic/src/helper"
 	"io"
 	"os"
+	"path"
+	"strings"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
@@ -13,10 +14,28 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+//获取日志
+var log_file_name = "project-logs.log"
+var log_file_path = "/logs"
+
+func GetLogFilePath() string {
+	curDir, _ := os.Getwd()
+	var p = curDir + "/" + log_file_path
+	p = path.Join(p, log_file_name)
+	p = strings.ReplaceAll(p, "\\", "/")
+	dir := path.Dir(p)
+	_, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		os.MkdirAll(dir, 0777)
+	}
+	return p
+}
+
 var Logger *logrus.Logger
 
+//设置日志中间件
 func LoggerToFile() gin.HandlerFunc {
-	logFilePath := helper.GetLogFilePath()
+	logFilePath := GetLogFilePath()
 	fileName := logFilePath
 	// 实例化
 	Logger = logrus.New()
@@ -35,10 +54,6 @@ func LoggerToFile() gin.HandlerFunc {
 	errorLogWriter, _ := rotatelogs.New(
 		// 分割后的文件名称
 		fileName+"_error.%Y%m%d.log",
-
-		// // 生成软链，指向最新日志文件
-		// rotatelogs.WithLinkName(fileName),
-
 		// 设置最大保存时间(60天)
 		rotatelogs.WithMaxAge(60*24*time.Hour),
 
@@ -49,13 +64,8 @@ func LoggerToFile() gin.HandlerFunc {
 	accessLogWriter, _ := rotatelogs.New(
 		// 分割后的文件名称
 		fileName+"_access.%Y%m%d.log",
-
-		// // 生成软链，指向最新日志文件
-		// rotatelogs.WithLinkName(fileName),
-
 		// 设置最大保存时间(60天)
 		rotatelogs.WithMaxAge(60*24*time.Hour),
-
 		// 设置日志切割时间间隔(1天)
 		rotatelogs.WithRotationTime(24*time.Hour),
 	)

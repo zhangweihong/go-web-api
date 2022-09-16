@@ -12,6 +12,7 @@ import (
 
 var MysqlDb *gorm.DB
 
+//初始化mysql
 func InitMysql() *gorm.DB {
 	var mysqlDbErr error
 	mysqlConfig := config.Mysql

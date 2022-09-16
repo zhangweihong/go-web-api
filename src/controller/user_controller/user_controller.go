@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+//查询所有user
 func FindeAllUser(ctx *gin.Context) {
 	type Params struct {
 		Test  string `form:"test" json:"test" binding:"required"`
@@ -34,6 +35,7 @@ func FindeAllUser(ctx *gin.Context) {
 	})
 }
 
+//上传头像
 func UploadAvatar(ctx *gin.Context) {
 	var wg sync.WaitGroup
 

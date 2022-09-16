@@ -10,6 +10,7 @@ import (
 
 var RedisClient *redis.Client
 
+//初始化redis
 func InitRedis() *redis.Client {
 	redisConfig := config.Redis
 	RedisClient = redis.NewClient(&redis.Options{

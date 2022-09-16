@@ -1,11 +1,13 @@
 package helper
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"strings"
 )
 
+//捕获异常
 func Try(fun func(), catch func(interface{})) {
 	defer func() {
 		if err := recover(); err != nil {
@@ -15,24 +17,17 @@ func Try(fun func(), catch func(interface{})) {
 	fun()
 }
 
+var upLoadDir = "upload/"
+
+//获取上传的文件路径
 func GetUploadsFilePath(relPath string) string {
 	curDir, _ := os.Getwd()
-	var p = curDir + "/upload/" + relPath
+	var p = fmt.Sprintf("%v/%v%v", curDir, upLoadDir, relPath)
 	p = strings.ReplaceAll(p, "\\", "/")
 	dir := path.Dir(p)
-	os.MkdirAll(dir, 0777)
-	return p
-}
-
-var log_file_name = "project-logs.log"
-var log_file_path = "/logs"
-
-func GetLogFilePath() string {
-	curDir, _ := os.Getwd()
-	var p = curDir + "/" + log_file_path
-	p = path.Join(p, log_file_name)
-	p = strings.ReplaceAll(p, "\\", "/")
-	dir := path.Dir(p)
-	os.MkdirAll(dir, 0777)
+	_, err := os.Stat(dir)
+	if os.IsNotExist(err) {
+		os.MkdirAll(dir, 0777)
+	}
 	return p
 }
