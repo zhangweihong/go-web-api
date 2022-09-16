@@ -1,0 +1,7 @@
+.vscode/*
+tmp/*
+*.exe
+test/*
+upload/*
+logs/*
+vendor/*
