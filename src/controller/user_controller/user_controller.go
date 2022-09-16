@@ -6,7 +6,7 @@ import (
 	"gin-framework/basic/src/middleware"
 	"gin-framework/basic/src/model"
 	user_service "gin-framework/basic/src/service/user_service"
-	"net/http"
+	"gin-framework/basic/src/status"
 	"runtime"
 	"sync"
 
@@ -21,7 +21,7 @@ func FindeAllUser(ctx *gin.Context) {
 	var params Params
 	if err := ctx.ShouldBind(&params); err != nil {
 		middleware.Logger.Error(err.Error())
-		ctx.JSON(http.StatusNotAcceptable, gin.H{"error": err.Error()})
+		ctx.JSON(status.CommonError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -29,7 +29,7 @@ func FindeAllUser(ctx *gin.Context) {
 	go func() {
 		chan_users <- user_service.SelectUser(ctx)
 	}()
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(status.Success, gin.H{
 		"user": <-chan_users,
 	})
 }
@@ -57,7 +57,7 @@ func UploadAvatar(ctx *gin.Context) {
 	}
 	wg.Wait()
 
-	ctx.JSON(http.StatusOK, gin.H{
+	ctx.JSON(status.Success, gin.H{
 		"state": 1,
 	})
 }
