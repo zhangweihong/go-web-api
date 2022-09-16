@@ -30,7 +30,7 @@ func FindeAllUser(ctx *gin.Context) {
 		chan_users <- user_service.SelectUser(ctx)
 	}()
 	ctx.JSON(http.StatusOK, gin.H{
-		"admin": <-chan_users,
+		"user": <-chan_users,
 	})
 }
 
