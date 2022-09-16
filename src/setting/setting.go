@@ -9,5 +9,5 @@ import (
 
 func Init(r *gin.Engine) {
 	r.Use(middleware.LoggerToFile()) //开启日志中间件
-	schedule.New()                   //开始定时任务
+	schedule.Start()                 //开始定时任务
 }

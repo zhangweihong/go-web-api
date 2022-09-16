@@ -5,7 +5,7 @@ import "github.com/jasonlvhit/gocron"
 var s *gocron.Scheduler
 
 //开启定时
-func New() {
+func Start() {
 	s = gocron.NewScheduler()
 	s.Start()
 }
