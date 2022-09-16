@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
+//高效拼接字符串
 var sBuild strings.Builder
 
-//高效拼接字符串
 func Splicing(strs ...string) string {
 	sBuild.Reset()
 	len := len(strs)
