@@ -10,7 +10,6 @@ import (
 )
 
 func Init(r *gin.Engine) {
-
 	db.ConnectDb()                   //链接数据库
 	router.SetRouter(r)              //设置路由
 	r.Use(middleware.LoggerToFile()) //开启日志中间件
