@@ -2,27 +2,23 @@ package helper
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
-	"gin-framework/basic/src/middleware"
+	"gin-framework/basic/src/common"
+	"gin-framework/basic/src/tool"
 	"io"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 //高效拼接字符串
 var sBuild strings.Builder
-
-func Splicing(strs ...string) string {
-	sBuild.Reset()
-	len := len(strs)
-	for i := 0; i < len; i++ {
-		sBuild.WriteString(strs[i])
-	}
-	return sBuild.String()
-}
 
 //捕获异常
 func Try(fun func(), catch func(interface{})) {
@@ -37,17 +33,33 @@ func Try(fun func(), catch func(interface{})) {
 var upLoadDir = "upload/"
 
 //获取上传的文件路径
-func GetUploadsFilePath(relPath string) string {
+func GetUploadsFilePath(relPath string) (string, string) {
 	curDir, _ := os.Getwd()
-	p := Splicing(curDir, "/", upLoadDir, relPath)
-	// var p = Splicing("%v/%v%v", curDir, upLoadDir, relPath)
+	//相对的路径
+	newRelPath := tool.Splicing(upLoadDir, GetLocalShortTime(), "/", relPath)
+	//绝对路径
+	p := tool.Splicing(curDir, "/", newRelPath)
 	p = strings.ReplaceAll(p, "\\", "/")
 	dir := path.Dir(p)
 	_, err := os.Stat(dir)
 	if os.IsNotExist(err) {
 		os.MkdirAll(dir, 0777)
 	}
-	return p
+	return p, newRelPath
+}
+
+//删除文件
+func DelUploadsFile(relPath string) {
+	curDir, _ := os.Getwd()
+	newRelPath := tool.Splicing(upLoadDir, relPath)
+	p := tool.Splicing(curDir, "/", newRelPath)
+	_, err := os.Stat(p)
+
+	if os.IsExist(err) {
+		os.Remove(p)
+	} else {
+		common.Logger.Warn(err.Error())
+	}
 }
 
 //获取当前时间 2019-12-12 12:33:19
@@ -60,6 +72,12 @@ func GetLocalTime() string {
 	minute := now.Minute() //分钟
 	second := now.Second() //秒
 	return fmt.Sprintf("%d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second)
+}
+
+//获取当前时间戳
+func GetTimeUnix() string {
+	now := time.Now() //获取当前时间
+	return strconv.FormatInt(now.UnixMilli(), 10)
 }
 
 //获取当前简单时间 2019-12-12
@@ -85,7 +103,29 @@ func Md5File(file *os.File) string {
 	h := md5.New()
 	_, err := io.Copy(h, file)
 	if err != nil {
-		middleware.Logger.Error(err)
+		common.Logger.Error(err)
 	}
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+//获取唯一ID
+func NewUUID() string {
+	u1, _ := uuid.NewUUID()
+	return u1.String()
+}
+
+//解密base64
+func Base64Decode(base string) string {
+	data, err := base64.StdEncoding.DecodeString(base)
+	if err != nil {
+		common.Logger.Error(err)
+		return ""
+	}
+	return string(data)
+}
+
+//加密base64
+func Base64Encode(str string) string {
+	data := base64.StdEncoding.EncodeToString([]byte(str))
+	return data
 }

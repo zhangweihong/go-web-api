@@ -2,8 +2,8 @@ package db
 
 import (
 	"fmt"
+	"gin-framework/basic/src/common"
 	"gin-framework/basic/src/config"
-	"gin-framework/basic/src/middleware"
 
 	"github.com/go-redis/redis"
 )
@@ -26,6 +26,6 @@ func InitRedis() *redis.Client {
 	if err == nil {
 		return RedisClient
 	}
-	middleware.Logger.Error(err)
+	common.Logger.Error(err)
 	return nil
 }

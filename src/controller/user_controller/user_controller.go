@@ -2,8 +2,8 @@ package admin_controller
 
 import (
 	"fmt"
+	"gin-framework/basic/src/common"
 	"gin-framework/basic/src/helper"
-	"gin-framework/basic/src/middleware"
 	"gin-framework/basic/src/model"
 	user_service "gin-framework/basic/src/service/user_service"
 	"gin-framework/basic/src/status"
@@ -21,7 +21,7 @@ func FindeAllUser(ctx *gin.Context) {
 	}
 	var params Params
 	if err := ctx.ShouldBind(&params); err != nil {
-		middleware.Logger.Error(err.Error())
+		common.Logger.Error(err.Error())
 		ctx.JSON(status.CommonError, gin.H{"error": err.Error()})
 		return
 	}
@@ -47,10 +47,10 @@ func UploadAvatar(ctx *gin.Context) {
 		_file := file
 		wg.Add(1)
 		go func() {
-			dst := helper.GetUploadsFilePath(_file.Filename)
+			dst, _ := helper.GetUploadsFilePath(_file.Filename)
 			err := ctx.SaveUploadedFile(_file, dst)
 			if err != nil {
-				middleware.Logger.Error(err)
+				common.Logger.Error(err)
 				wg.Done()
 				runtime.Goexit()
 			}

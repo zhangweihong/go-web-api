@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"gin-framework/basic/src/common"
 	"io"
 	"os"
 	"path"
@@ -31,24 +32,22 @@ func GetLogFilePath() string {
 	return p
 }
 
-var Logger *logrus.Logger
-
 //设置日志中间件
 func LoggerToFile() gin.HandlerFunc {
 	logFilePath := GetLogFilePath()
 	fileName := logFilePath
 	// 实例化
-	Logger = logrus.New()
+	common.Logger = logrus.New()
 
 	// 设置输出
-	Logger.SetOutput(io.MultiWriter(os.Stdout))
+	common.Logger.SetOutput(io.MultiWriter(os.Stdout))
 
-	Logger.Formatter = &logrus.TextFormatter{
+	common.Logger.Formatter = &logrus.TextFormatter{
 		ForceColors: true,
 	}
 
 	// 设置日志级别
-	Logger.SetLevel(logrus.InfoLevel)
+	common.Logger.SetLevel(logrus.InfoLevel)
 
 	// 设置 rotatelogs
 	errorLogWriter, _ := rotatelogs.New(
@@ -84,7 +83,7 @@ func LoggerToFile() gin.HandlerFunc {
 	})
 
 	// 新增 Hook
-	Logger.AddHook(lfHook)
+	common.Logger.AddHook(lfHook)
 
 	return func(c *gin.Context) {
 		// 处理请求
@@ -110,7 +109,7 @@ func LoggerToFile() gin.HandlerFunc {
 			// 请求IP
 			clientIP := c.ClientIP()
 			// 日志格式
-			Logger.WithFields(logrus.Fields{
+			common.Logger.WithFields(logrus.Fields{
 				"status_code":  statusCode,
 				"latency_time": latencyTime,
 				"client_ip":    clientIP,
