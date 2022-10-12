@@ -3,6 +3,7 @@ package admin_controller
 import (
 	"fmt"
 	"gin-framework/basic/src/common"
+	"gin-framework/basic/src/controller"
 	"gin-framework/basic/src/helper"
 	"gin-framework/basic/src/model"
 	user_service "gin-framework/basic/src/service/user_service"
@@ -20,19 +21,16 @@ func FindeAllUser(ctx *gin.Context) {
 		Test2 string `form:"test2" json:"test2" binding:"required"`
 	}
 	var params Params
-	if err := ctx.ShouldBind(&params); err != nil {
-		common.Logger.Error(err.Error())
-		ctx.JSON(status.CommonError, gin.H{"error": err.Error()})
-		return
+	if controller.ValidateParams(ctx, &params) {
+		chan_users := make(chan []model.User)
+		go func() {
+			chan_users <- user_service.SelectUser(ctx)
+		}()
+		ctx.JSON(status.Success, gin.H{
+			"user": <-chan_users,
+		})
 	}
 
-	chan_users := make(chan []model.User)
-	go func() {
-		chan_users <- user_service.SelectUser(ctx)
-	}()
-	ctx.JSON(status.Success, gin.H{
-		"user": <-chan_users,
-	})
 }
 
 //上传头像

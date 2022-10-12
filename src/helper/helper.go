@@ -33,7 +33,7 @@ func Try(fun func(), catch func(interface{})) {
 var upLoadDir = "upload/"
 
 //获取上传的文件路径
-func GetUploadsFilePath(relPath string) (string, string) {
+func GetUploadsFilePath(relPath string) (abPath string, rPath string) {
 	curDir, _ := os.Getwd()
 	//相对的路径
 	newRelPath := tool.Splicing(upLoadDir, GetLocalShortTime(), "/", relPath)

@@ -15,7 +15,7 @@ func Splicing(strs ...string) string {
 }
 
 //查询数组是否含有
-func FindIndex[T string | int](originArray []T, flag T) int {
+func FindIndex[T string | int | bool](originArray []T, flag T) int {
 
 	if originArray == nil {
 		return -1
@@ -30,7 +30,7 @@ func FindIndex[T string | int](originArray []T, flag T) int {
 	return -1
 }
 
-//三元运算
+//三元运算函数
 func If(condition bool, trueVal, falseVal interface{}) interface{} {
 	if condition {
 		return trueVal
