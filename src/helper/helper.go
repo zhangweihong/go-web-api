@@ -1,9 +1,13 @@
 package helper
 
 import (
+	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"gin-framework/basic/src/common"
 	"gin-framework/basic/src/tool"
@@ -128,4 +132,75 @@ func Base64Decode(base string) string {
 func Base64Encode(str string) string {
 	data := base64.StdEncoding.EncodeToString([]byte(str))
 	return data
+}
+
+//pkcs7Padding 填充
+func pkcs7Padding(data []byte, blockSize int) []byte {
+	//判断缺少几位长度。最少1，最多 blockSize
+	padding := blockSize - len(data)%blockSize
+	//补足位数。把切片[]byte{byte(padding)}复制padding个
+	padText := bytes.Repeat([]byte{byte(padding)}, padding)
+	return append(data, padText...)
+}
+
+//pkcs7UnPadding 填充的反向操作
+func pkcs7UnPadding(data []byte) ([]byte, error) {
+	length := len(data)
+	if length == 0 {
+		return nil, errors.New("加密字符串错误！")
+	}
+	//获取填充的个数
+	unPadding := int(data[length-1])
+	return data[:(length - unPadding)], nil
+}
+
+//AES 加密 iv长度16位
+func AES_CBC_PK7Encrypt(strData string, strKey string, strIV string) (base64 string, err error) {
+	//创建加密实例
+	key := []byte(strKey)
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	iv := []byte(strIV)
+	data := []byte(strData)
+	//判断加密快的大小
+	blockSize := block.BlockSize()
+	//填充
+	encryptBytes := pkcs7Padding(data, blockSize)
+	//初始化加密数据接收切片
+	crypted := make([]byte, len(encryptBytes))
+	//使用cbc加密模式
+	blockMode := cipher.NewCBCEncrypter(block, iv)
+	//执行加密
+	blockMode.CryptBlocks(crypted, encryptBytes)
+
+	return Base64Encode(string(crypted)), nil
+}
+
+//AesDecrypt 解密 iv长度16位
+func AES_CBC_PK7Decrypt(base64Str string, strKey string, strIV string) (deStr string, err error) {
+	key := []byte(strKey)
+	//创建实例
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	iv := []byte(strIV)
+	data := []byte(Base64Decode(base64Str))
+
+	//使用cbc
+	blockMode := cipher.NewCBCDecrypter(block, iv)
+	//初始化解密数据接收切片
+	crypted := make([]byte, len(data))
+	//执行解密
+	blockMode.CryptBlocks(crypted, data)
+	//去除填充
+	crypted, err = pkcs7UnPadding(crypted)
+	if err != nil {
+		return "", err
+	}
+	return string(crypted), nil
 }
