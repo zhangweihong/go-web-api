@@ -125,9 +125,25 @@ func Base64Decode(base string) string {
 	return string(data)
 }
 
+//解密base64
+func Base64DecodeForBytes(base string) []byte {
+	data, err := base64.StdEncoding.DecodeString(base)
+	if err != nil {
+		common.Logger.Error(err)
+		return nil
+	}
+	return data
+}
+
 //加密base64
 func Base64Encode(str string) string {
-	data := base64.StdEncoding.EncodeToString([]byte(str))
+	data := Base64EncodeForBytes([]byte(str))
+	return data
+}
+
+//加密base64
+func Base64EncodeForBytes(bytes []byte) string {
+	data := base64.StdEncoding.EncodeToString(bytes)
 	return data
 }
 
@@ -173,11 +189,11 @@ func AES_CBC_PK7Encrypt(strData string, strKey string, strIV string) (base64 str
 	//执行加密
 	blockMode.CryptBlocks(crypted, encryptBytes)
 
-	return Base64Encode(string(crypted)), nil
+	return Base64EncodeForBytes(crypted), nil
 }
 
 //AesDecrypt 解密 iv长度16位
-func AES_CBC_PK7Decrypt(base64Str string, strKey string, strIV string) (deStr string, err error) {
+func AES_CBC_PK7Decrypt(base64Str string, strKey string, strIV string) (origin string, err error) {
 	key := []byte(strKey)
 	//创建实例
 	block, err := aes.NewCipher(key)
@@ -186,7 +202,7 @@ func AES_CBC_PK7Decrypt(base64Str string, strKey string, strIV string) (deStr st
 		return "", err
 	}
 	iv := []byte(strIV)
-	data := []byte(Base64Decode(base64Str))
+	data := Base64DecodeForBytes(base64Str)
 
 	//使用cbc
 	blockMode := cipher.NewCBCDecrypter(block, iv)
