@@ -21,9 +21,6 @@ import (
 	"github.com/google/uuid"
 )
 
-//高效拼接字符串
-var sBuild strings.Builder
-
 //捕获异常
 func Try(fun func(), catch func(interface{})) {
 	defer func() {
@@ -165,7 +162,7 @@ func AES_CBC_PK7Encrypt(strData string, strKey string, strIV string) (base64 str
 	}
 	iv := []byte(strIV)
 	data := []byte(strData)
-	//判断加密快的大小
+	//块的大小
 	blockSize := block.BlockSize()
 	//填充
 	encryptBytes := pkcs7Padding(data, blockSize)
